@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import time, math, subprocess, datetime
+import time, subprocess, datetime
 
 '''
 LKHZ is a class to dynamically calculate the CONFIG_HZ value for a running Linux Kernel.
