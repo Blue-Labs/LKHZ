@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-import time, subprocess, datetime
+import time
+import gzip
+import datetime
+import subprocess
 
 '''
 LKHZ is a class to dynamically calculate the CONFIG_HZ value for a running Linux Kernel.
@@ -11,12 +14,23 @@ class LKHZ():
     def __init__(self):
         self._hz       = []
         self._count    = 100
-        self.config_hz = int(subprocess.check_output(['zgrep','^CONFIG_HZ=','/proc/config.gz']).decode().strip().split('=')[1])
+        self.config_hz = self._read_kernel_config_gz()
         
         self.offset          = self.cpu0_offset
         self.last_since_boot = self.offset
         self._oavg           = 0
 
+
+    def _read_kernel_config_gz(self) -> int:
+        _hz = None
+        with gzip.open('/proc/config.gz') as f:
+            for ln in f:
+                if ln.startswith(b'CONFIG_HZ='):
+                    _hz = ln.decode().split('=')[1]
+                    _hz = int(_hz)
+                    break
+
+        return _hz
 
     def calibrate(self):
         for i in range(self._count):
@@ -27,7 +41,7 @@ class LKHZ():
 
 
     @property
-    def user_hz(self):
+    def user_hz(self) -> int:
         # my testing has always resulted in a HZ value a fraction higher than the integer value
         # but we'll add 2 to be on the safe side
         return int(self.HZ+2 // 50*50)
