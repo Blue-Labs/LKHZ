@@ -12,3 +12,10 @@ notifications:
         recipients:
             - firefighterblu3@gmail.com
         on_success: always
+
+install:
+    - pip install flake8 pytest pytest-cov
+
+script:
+    - flake8 --exclude venv* --statistics
+    - pytest -v --cov=lkml
